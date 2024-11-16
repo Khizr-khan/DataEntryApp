@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Users</title>
+    <style>
+        body {
+            background-color: #46176d;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+        .section {
+            background-color: #E2007A;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        h2 {
+            margin-top: 0;
+        }
+        label, input, button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+        }
+        input, button {
+            padding: 8px;
+            border-radius: 4px;
+            border: none;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+        .user-list li {
+            background-color: white;
+            color: black;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 5px 0;
+            display: flex;
+            justify-content: space-between;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin - Manage Users</h1>
+
+        <div class="section">
+            <h2>Add or Remove Users</h2>
+            <form action="{{ url_for('admin.manage_users') }}" method="POST">
+                <input type="text" name="name" placeholder="Enter user name" required>
+                <button type="submit" name="action" value="add_user">Add User</button>
+            </form>
+            <ul class="user-list">
+                {% for user in users %}
+                    <li>
+                        {{ user.name }}
+                        <form action="{{ url_for('admin.manage_users') }}" method="POST" style="display: inline;">
+                            <input type="hidden" name="name" value="{{ user.name }}">
+                            <button type="submit" name="action" value="delete_user">Delete</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

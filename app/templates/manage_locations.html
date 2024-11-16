@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Manage Locations</title>
+    <style>
+        body {
+            background-color: #46176d;
+            color: white;
+            font-family: Arial, sans-serif;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: auto;
+        }
+
+        .section {
+            background-color: #E2007A;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h2 {
+            margin-top: 0;
+        }
+
+        label, input, button {
+            display: block;
+            width: 100%;
+            margin: 10px 0;
+        }
+
+        input, button {
+            padding: 8px;
+            border-radius: 4px;
+            border: none;
+        }
+
+        button {
+            background-color: #4CAF50;
+            color: white;
+            cursor: pointer;
+        }
+
+        .location-list {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .location-list li {
+            display: flex;
+            justify-content: space-between;
+            background-color: white;
+            color: black;
+            padding: 8px;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Manage Locations</h1>
+        <a href="{{ url_for('admin.dashboard') }}" style="color: white; font-weight: bold;">Back to Dashboard</a>
+
+        <div class="section">
+            <h2>Add or Remove Locations</h2>
+            <form action="{{ url_for('admin.manage_locations') }}" method="POST">
+                <input type="text" name="location" placeholder="Enter location name" required>
+                <button type="submit" name="action" value="add">Add Location</button>
+            </form>
+            <ul class="location-list">
+                {% for location in locations %}
+                    <li>
+                        {{ location.name }}
+                        <form action="{{ url_for('admin.manage_locations') }}" method="POST" style="display: inline;">
+                            <input type="hidden" name="location" value="{{ location.name }}">
+                            <button type="submit" name="action" value="delete" style="background-color: #E2007A;">Delete</button>
+                        </form>
+                    </li>
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

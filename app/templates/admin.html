@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Dashboard</title>
+    <style>
+        body {
+            background-color: #46176d;
+            color: white;
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            width: 100%;
+            max-width: 1200px;
+            margin: auto;
+        }
+        .section {
+            background-color: #E2007A;
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        table {
+            width: 100%;
+            background-color: white;
+            color: black;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        th, td {
+            padding: 10px;
+            border: 1px solid #ddd;
+            text-align: left;
+        }
+        th {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 8px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            margin: 5px;
+            text-decoration: none;
+        }
+        .button.red {
+            background-color: #E2007A;
+        }
+        .button-container {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .top-right {
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+        .chart-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+        }
+        .chart {
+            flex: 1;
+            min-width: 300px;
+            background-color: white;
+            color: black;
+            border-radius: 8px;
+            text-align: center;
+            padding: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Admin Dashboard</h1>
+
+        <!-- Top Right Button for Change Password -->
+        <div class="top-right">
+            <a href="{{ url_for('admin.change_password') }}" class="button">Change Password</a>
+        </div>
+
+        <!-- Navigation Buttons -->
+        <div class="button-container">
+            <a href="{{ url_for('data_entry.index') }}" class="button">Home</a>
+            <a href="{{ url_for('admin.manage_usernames') }}" class="button">Manage Usernames</a>
+            <a href="{{ url_for('admin.manage_locations') }}" class="button">Manage Locations</a>
+            <a href="{{ url_for('admin.logout') }}" class="button red">Logout</a>
+        </div>
+
+        <!-- Download Data Section -->
+        <div class="section">
+            <h2>Download Data</h2>
+            <form action="{{ url_for('admin.download_data') }}" method="POST">
+                <input type="hidden" name="start_date" value="{{ start_date_full }}">
+                <input type="hidden" name="end_date" value="{{ end_date_full }}">
+                <label for="filename">Filename:</label>
+                <input type="text" id="filename" name="filename" placeholder="Enter filename" style="width: 100%; padding: 8px; margin: 10px 0;">
+                <button type="submit" class="button">Download Data</button>
+            </form>
+        </div>
+
+        <!-- Filter and Sort Data Section -->
+        <div class="section">
+            <h2>Filter and Sort Data</h2>
+            <form action="{{ url_for('admin.dashboard') }}" method="POST">
+                <label for="start_date_full">Start Date:</label>
+                <input type="date" id="start_date_full" name="start_date_full" value="{{ start_date_full }}">
+
+                <label for="end_date_full">End Date:</label>
+                <input type="date" id="end_date_full" name="end_date_full" value="{{ end_date_full }}">
+
+                <label for="filter_name_full">Name:</label>
+                <select id="filter_name_full" name="filter_name_full">
+                    <option value="">All</option>
+                    {% for name in names %}
+                        <option value="{{ name }}" {% if filter_name_full == name %}selected{% endif %}>{{ name }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="filter_location_full">Location:</label>
+                <select id="filter_location_full" name="filter_location_full">
+                    <option value="">All</option>
+                    {% for location in locations %}
+                        <option value="{{ location }}" {% if filter_location_full == location %}selected{% endif %}>{{ location }}</option>
+                    {% endfor %}
+                </select>
+
+                <label for="sort_full">Sort By:</label>
+                <select id="sort_full" name="sort_full">
+                    <option value="datetime" {% if sort_full == 'datetime' %}selected{% endif %}>Date and Time</option>
+                    <option value="total_amount" {% if sort_full == 'total_amount' %}selected{% endif %}>Total Amount</option>
+                </select>
+
+                <button type="submit" class="button">Apply Filters</button>
+            </form>
+        </div>
+
+        <!-- Data Table with Edit and Delete Actions -->
+        <div class="section">
+            <h2>Data Table</h2>
+            <table>
+                <tr>
+                    <th>Name</th>
+                    <th>Location</th>
+                    <th>Date</th>
+                    <th>Cash Amount</th>
+                    <th>Others</th>
+                    <th>Total Amount</th>
+                    <th>Created At</th>
+                    <th>Updated At</th>
+                    <th>Actions</th>
+                </tr>
+                {% for entry in full_data %}
+                <tr>
+                    <td>{{ entry.name }}</td>
+                    <td>{{ entry.location }}</td>
+                    <td>{{ entry.datetime.strftime('%Y-%m-%d') }}</td>
+                    <td>{{ entry.cash_amount }}</td>
+                    <td>{{ entry.others }}</td>
+                    <td>{{ entry.total_amount }}</td>
+                    <td>{{ entry.created_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td>{{ entry.updated_at.strftime('%Y-%m-%d %H:%M:%S') }}</td>
+                    <td>
+                        <a href="{{ url_for('admin.edit_user_data', user_id=entry.id) }}" class="button">Edit</a>
+                        <form action="{{ url_for('admin.delete_entry', entry_id=entry.id) }}" method="POST" style="display:inline;">
+                            <button type="submit" class="button red" onclick="return confirm('Are you sure?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+
+        <!-- Chart Section -->
+        <div class="section">
+            <h2>Data Visualizations</h2>
+            <div class="chart-container">
+                <div class="chart">
+                    <h3>Total Sum by Date</h3>
+                    <img src="{{ url_for('admin.chart_date_sum') }}" alt="Date Sum Chart" style="width: 100%; height: auto;">
+                </div>
+                <div class="chart">
+                    <h3>Total Amount by Name</h3>
+                    <img src="{{ url_for('admin.chart_name_sum') }}" alt="Name Sum Chart" style="width: 100%; height: auto;">
+                </div>
+                <div class="chart">
+                    <h3>Total Amount by Location</h3>
+                    <img src="{{ url_for('admin.chart_location_sum') }}" alt="Location Sum Chart" style="width: 100%; height: auto;">
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
